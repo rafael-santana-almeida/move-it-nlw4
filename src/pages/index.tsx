@@ -1,5 +1,7 @@
 import Head from 'next/head';
+import { GetServerSideProps } from 'next';
 
+import { ChallengesProvider } from '../contexts/ChallengesContext';
 import { CountdownProvider } from '../contexts/CountdownContext';
 
 import CompletedChallenges from "../components/CompletedChallenges";
@@ -10,26 +12,50 @@ import ChallengeBox from "../components/ChallengeBox";
 
 import sytles from '../styles/pages/Home.module.css';
 
-export default function Home() {
-  return (
-    <div className={sytles.container}>
-      <Head>
-        <title>Início | move.it</title>
-      </Head>
-      <ExperienceBar />
+interface HomeProps {
+  level: number;
+  currentExperience: number;
+  challengesCompleted: number;
+}
 
-      <CountdownProvider>
-        <section>
-          <div>
-            <Profile />
-            <CompletedChallenges />
-            <Countdown />
-          </div>
-          <div>
-            <ChallengeBox />
-          </div>
-        </section>
-      </CountdownProvider>
-    </div>
+export default function Home(props: HomeProps) {
+  return (
+    <ChallengesProvider
+      level={props.level}  
+      currentExperience={props.currentExperience}
+      challengesCompleted={props.challengesCompleted}
+    >
+      <div className={sytles.container}>
+        <Head>
+          <title>Início | move.it</title>
+        </Head>
+        <ExperienceBar />
+
+        <CountdownProvider>
+          <section>
+            <div>
+              <Profile />
+              <CompletedChallenges />
+              <Countdown />
+            </div>
+            <div>
+              <ChallengeBox />
+            </div>
+          </section>
+        </CountdownProvider>
+      </div>
+    </ChallengesProvider>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { level, currentExperience, challengesCompleted } = ctx.req.cookies;
+
+  return {
+    props: {
+      level: Number(level),
+      currentExperience: Number(currentExperience),
+      challengesCompleted: Number(challengesCompleted)
+    }
+  }
 }
